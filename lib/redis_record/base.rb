@@ -5,86 +5,39 @@ module RedisRecord::Base
     extend ActiveSupport::Callbacks
 
     define_callbacks :save
+    define_callbacks :destroy
     attr_accessor :persisted
+    attr_accessor :original_attributes
   end
 
   def save
-    run_callbacks :save do
-      old_dog = self.class.find(id)
-      success = RedisRecord.REDIS.multi do
-        RedisRecord.REDIS.mapped_hmset(key, attributes)
-
-        if old_dog
-          old_dog.remove_from_sort_lists
-          old_dog.remove_from_filter_lists
-        end
-        add_to_sort_lists
-        add_to_filter_lists
-
+    success = nil
+    RedisRecord.REDIS.multi do
+      run_callbacks :save do
+        success = RedisRecord.REDIS.mapped_hmset(key, attributes)
       end
-      self.persisted = (success.first == "OK")
     end
+    self.persisted = (success.value == "OK")
   end
-
   alias save! save
 
-  def key
-    self.class.key(id)
+  def destroy
+    success = nil
+    RedisRecord.REDIS.multi do
+      run_callbacks :destroy do
+        success = RedisRecord.REDIS.del key
+      end
+    end
+    success.value == 1 ? self : nil
   end
+  alias destroy! destroy
 
   def update_attributes(attrs)
     assign_attributes attrs
     save
   end
 
-  def destroy
-    success = RedisRecord.REDIS.multi do
-      RedisRecord.REDIS.del key
-
-      remove_from_sort_lists
-      remove_from_filter_lists
-    end
-    success.first == 1 ? self : nil
+  def key
+    self.class.key(id)
   end
-
-protected
-  def add_to_sort_lists
-    defined_sorts.each do |name, block|
-      score = 0
-      if block
-        if block.respond_to? :call
-          score = block.call self
-        else
-          score = self.send block
-        end
-      end
-      RedisRecord.REDIS.zadd self.class.meta_key(name), score, id
-    end
-  end
-
-  def remove_from_sort_lists
-    defined_sorts.each do |name, _|
-      RedisRecord.REDIS.zrem self.class.meta_key(name), id
-    end
-  end
-
-  def add_to_filter_lists
-    defined_filters.each do |name, block|
-      RedisRecord.REDIS.sadd filter_key(name, block), id
-    end
-  end
-
-  def remove_from_filter_lists
-    defined_filters.each do |name, block|
-      RedisRecord.REDIS.srem filter_key(name, block), id
-    end
-  end
-
-private
-  def filter_key(name, block)
-    value = block ? block.call(self) : self.send(name)
-    RedisRecord.REDIS.zincrby self.class.filter_key('_Values', name), 1, value
-    self.class.filter_key(name, value)
-  end
-
 end

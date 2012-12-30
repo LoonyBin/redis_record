@@ -3,7 +3,7 @@ require 'fixtures/domain'
 
 describe Domain do
   before(:each) do
-    (0..4).each { |i| Domain.create id: "#{i}.com", status: 'Pre-release' }
+    (0..4).each { |i| Domain.create id: "#{i}.com" }
   end
 
   it "should return all the records" do
@@ -28,13 +28,6 @@ describe Domain do
 
   it "should not return more records than existing" do
     Domain.offset(3).limit(3).all.map(&:id).should eq %w[3.com 4.com]
-  end
-
-  it "should not display hidden records" do
-    Domain.first.update_attributes hidden: true
-
-    Domain.filter(:hidden, false).count.should eq 4
-    Domain.filter(:hidden, false).all.map(&:id).should eq %w[1.com 2.com 3.com 4.com]
   end
 
 end

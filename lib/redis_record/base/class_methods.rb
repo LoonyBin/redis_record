@@ -50,7 +50,10 @@ module RedisRecord::Base
   private
     def find_by_key(key)
       attributes = RedisRecord.REDIS.mapped_hmget(key, *attribute_names)
-      attributes['id'] && self.new(attributes).tap { |r| r.persisted = true }
+      attributes['id'] && self.new(attributes).tap { |r|
+        r.persisted = true
+        r.original_attributes = attributes
+      }
     end
 
   end

@@ -9,6 +9,8 @@ class RedisRecord
   include ActiveAttr::Model
   include DataTypes
   include Base
+  include Sorting
+  include Filters
 
   @@REDIS = nil
 
