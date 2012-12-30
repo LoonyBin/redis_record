@@ -1,5 +1,6 @@
 require 'active_attr'
 require 'active_support'
+require 'redis'
 
 class RedisRecord
 
@@ -9,6 +10,14 @@ class RedisRecord
   include DataTypes
   include Base
 
+  @@REDIS = nil
+
+  def self.REDIS
+    @@REDIS
+  end
+  def self.REDIS=(client)
+    @@REDIS = client
+  end
 
   class_attribute :defined_sorts, :defined_filters
   self.defined_sorts = {id: nil}

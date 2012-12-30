@@ -45,7 +45,7 @@ class RedisScope
   # Executors
   def count
     apply_filters
-    total_records = REDIS.zcard temp_key
+    total_records = RedisRecord.REDIS.zcard temp_key
 
     remaining_records = total_records - @options[:offset]
 
@@ -77,7 +77,7 @@ private
 
   def ids
     apply_filters
-    REDIS.zrangebyscore temp_key, @options[:min], @options[:max], limit: [@options[:offset], @options[:limit] || -1]
+    RedisRecord.REDIS.zrangebyscore temp_key, @options[:min], @options[:max], limit: [@options[:offset], @options[:limit] || -1]
   end
 
   def apply_filters
@@ -86,7 +86,7 @@ private
         values = value
         union_key = @model.filter_key "_Union:#{name}", values.join('_')
         value_keys = values.map {|value| @model.filter_key name, value}
-        REDIS.zunionstore union_key, value_keys
+        RedisRecord.REDIS.zunionstore union_key, value_keys
         union_key
       else
         @model.filter_key name, value
@@ -94,7 +94,7 @@ private
     end
     key_sets = [@model.meta_key(@options[:sort])] + filter_keys
     weights = [1] + [0] * @options[:filters].count
-    REDIS.zinterstore temp_key, key_sets, weights: weights
+    RedisRecord.REDIS.zinterstore temp_key, key_sets, weights: weights
   end
 
   def temp_key

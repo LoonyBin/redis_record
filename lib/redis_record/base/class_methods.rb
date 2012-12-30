@@ -1,3 +1,5 @@
+require 'active_support/core_ext/module/delegation'
+
 module RedisRecord::Base
   module ClassMethods
 
@@ -30,7 +32,7 @@ module RedisRecord::Base
     end
 
     def values_for_filter(name)
-      REDIS.zrange filter_key('_Values', name), 0, -1
+      RedisRecord.REDIS.zrange filter_key('_Values', name), 0, -1
     end
 
     def meta_key(attr)
@@ -47,7 +49,7 @@ module RedisRecord::Base
 
   private
     def find_by_key(key)
-      attributes = REDIS.mapped_hmget(key, *attribute_names)
+      attributes = RedisRecord.REDIS.mapped_hmget(key, *attribute_names)
       attributes['id'] && self.new(attributes).tap { |r| r.persisted = true }
     end
 

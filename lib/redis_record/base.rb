@@ -11,8 +11,8 @@ module RedisRecord::Base
   def save
     run_callbacks :save do
       old_dog = self.class.find(id)
-      success = REDIS.multi do
-        REDIS.mapped_hmset(key, attributes)
+      success = RedisRecord.REDIS.multi do
+        RedisRecord.REDIS.mapped_hmset(key, attributes)
 
         if old_dog
           old_dog.remove_from_sort_lists
@@ -38,8 +38,8 @@ module RedisRecord::Base
   end
 
   def destroy
-    success = REDIS.multi do
-      REDIS.del key
+    success = RedisRecord.REDIS.multi do
+      RedisRecord.REDIS.del key
 
       remove_from_sort_lists
       remove_from_filter_lists
@@ -58,32 +58,32 @@ protected
           score = self.send block
         end
       end
-      REDIS.zadd self.class.meta_key(name), score, id
+      RedisRecord.REDIS.zadd self.class.meta_key(name), score, id
     end
   end
 
   def remove_from_sort_lists
     defined_sorts.each do |name, _|
-      REDIS.zrem self.class.meta_key(name), id
+      RedisRecord.REDIS.zrem self.class.meta_key(name), id
     end
   end
 
   def add_to_filter_lists
     defined_filters.each do |name, block|
-      REDIS.sadd filter_key(name, block), id
+      RedisRecord.REDIS.sadd filter_key(name, block), id
     end
   end
 
   def remove_from_filter_lists
     defined_filters.each do |name, block|
-      REDIS.srem filter_key(name, block), id
+      RedisRecord.REDIS.srem filter_key(name, block), id
     end
   end
 
 private
   def filter_key(name, block)
     value = block ? block.call(self) : self.send(name)
-    REDIS.zincrby self.class.filter_key('_Values', name), 1, value
+    RedisRecord.REDIS.zincrby self.class.filter_key('_Values', name), 1, value
     self.class.filter_key(name, value)
   end
 
