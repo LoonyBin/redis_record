@@ -11,7 +11,7 @@ module RedisRecord::Base
     delegate :all, :each, :map, :count, :first, :last, :to => :scoped
 
     def create(*args)
-      new(*args).save
+      new(*args).tap &:save
     end
 
     def find(id)
@@ -58,4 +58,3 @@ module RedisRecord::Base
 
   end
 end
-

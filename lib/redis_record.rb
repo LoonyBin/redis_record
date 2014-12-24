@@ -11,6 +11,7 @@ class RedisRecord
   include Base
   include Sorting
   include Filters
+	include Relations
 
   @@REDIS = nil
 
