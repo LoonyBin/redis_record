@@ -1,7 +1,4 @@
 class Domain < RedisRecord
-  attr_accessible :id
-  attr_accessible :hidden, :liked
-
   string    :id # name
   boolean   :hidden, :default => false
   boolean   :liked, :default => false

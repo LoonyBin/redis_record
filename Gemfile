@@ -8,4 +8,5 @@ gem 'guard'
   gem 'rb-fsevent' if RUBY_PLATFORM.downcase.include?("darwin")
 gem 'guard-bundler'
 gem 'guard-rspec'
+gem 'pry'
 gem 'rspec'
