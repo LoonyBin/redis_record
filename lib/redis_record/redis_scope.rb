@@ -16,6 +16,7 @@ class RedisScope
   # always returns self
 
   def filter(name, value=true)
+    name = name.to_sym
     raise NameError, ":#{name} isn't in the defined filters" unless @model.defined_filters.include? name
     new_filters = @options[:filters] + [[name, value]]
 
@@ -59,7 +60,7 @@ class RedisScope
   def all
     ids.map {|id| @model.find id}
   end
-  delegate :each, :map, to: :all
+  delegate :each, :map, :to_a, to: :all
   delegate :as_json, to: :all
 
   def first

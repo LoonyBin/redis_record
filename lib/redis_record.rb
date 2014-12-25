@@ -16,7 +16,7 @@ class RedisRecord
   @@REDIS = nil
 
   def self.REDIS
-    @@REDIS
+    @@REDIS ||= Redis.new
   end
   def self.REDIS=(client)
     @@REDIS = client
