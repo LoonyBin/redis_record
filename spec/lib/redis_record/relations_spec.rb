@@ -48,5 +48,10 @@ describe Post do
       post.comments = comments
       expect(comments.map &:post_id).to all eq post.id
     end
+
+    it 'should have a constructor to add elements' do
+      post.comments.create id: '234'
+      expect(Comment.find('234').post_id).to eq post.id
+    end
   end
 end

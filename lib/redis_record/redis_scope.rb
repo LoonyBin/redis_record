@@ -71,6 +71,14 @@ class RedisScope
     offset(@options[:offset] + count - 1).limit(1).all[0]
   end
 
+  def build(attr)
+    @model.new(attr.merge Hash[@options[:filters]])
+  end
+
+  def create(attr)
+    @model.create(attr.merge Hash[@options[:filters]])
+  end
+
 private
   def chain_scope(opts = {})
     self.class.new @model, @options.merge(opts)
