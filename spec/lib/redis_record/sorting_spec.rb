@@ -8,13 +8,13 @@ describe Domain do
     end
 
     it "should sort by given attribute" do
-      Domain.sort(:length).map(&:id).should eq %w[a aa aaa aaaa]
+      expect(Domain.sort(:length).map(&:id)).to eq %w[a aa aaa aaaa]
     end
 
     it "should filter for min and max on the sort" do
-      Domain.sort(:length).min(3).map(&:id).should eq %w[aaa aaaa]
-      Domain.sort(:length).max(4).map(&:id).should eq %w[a aa aaa aaaa]
-      Domain.sort(:length).min(2).max(4).map(&:id).should eq %w[aa aaa aaaa]
+      expect(Domain.sort(:length).min(3).map(&:id)).to eq %w[aaa aaaa]
+      expect(Domain.sort(:length).max(4).map(&:id)).to eq %w[a aa aaa aaaa]
+      expect(Domain.sort(:length).min(2).max(4).map(&:id)).to eq %w[aa aaa aaaa]
     end
   end
 end
