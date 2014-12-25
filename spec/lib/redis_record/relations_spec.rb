@@ -17,7 +17,7 @@ class Comment < RedisRecord
 end
 
 describe Post do
-  subject(:post) { Post.new }
+  subject(:post) { Post.new id: '123' }
 
   it { should respond_to :comments }
 
@@ -33,6 +33,20 @@ describe Post do
     it 'should have a setter for the relation' do
       post.blog = blog
       expect(post.blog_id).to eq blog.id
+    end
+  end
+
+  context 'with has_many' do
+    let(:comments) { (1..2).map { |i| Comment.create id: i } }
+    it 'should have a getter for the relation' do
+      comments.each {|c| c.update_attributes post_id: post.id }
+
+      expect(post.comments.all).to match_array comments
+    end
+
+    it 'should have a setter for the relation' do
+      post.comments = comments
+      expect(comments.map &:post_id).to all eq post.id
     end
   end
 end

@@ -7,7 +7,9 @@ module RedisRecord::Relations
       relation = relation.to_s.singularize
       klass = relation.classify.constantize
       column_name = "#{relation}_id"
+
       attribute column_name, type: klass.attributes[:id][:type]
+      create_filter column_name
 
       define_method relation do
         id = send column_name
@@ -20,7 +22,19 @@ module RedisRecord::Relations
     end
 
     def has_many(relation)
+      relation = relation.to_s
+      column_name = "#{self.name.underscore}_id"
+
+      #klass.create_filter column_name
+
       define_method relation do
+        klass = relation.singularize.classify.constantize
+
+        klass.filter column_name, id
+      end
+
+      define_method "#{relation}=" do |enum|
+        enum.each { |obj| obj.update_attributes column_name => id }
       end
     end
   end
