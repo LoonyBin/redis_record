@@ -44,5 +44,9 @@ describe Domain do
       expect(Domain.filter(:hidden, false).count).to eq 5
       expect(Domain.filter(:hidden, false).all.map(&:id)).to eq %w[6-.net a.com a.org b.com b.org]
     end
+
+    it "should return only records matching a where clause" do
+      expect(Domain.where(numbers: true, hyphenated: true).all.map(&:id)).to eq %w[5-.net 6-.net]
+    end
   end
 end

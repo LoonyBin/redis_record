@@ -23,6 +23,12 @@ class RedisScope
     chain_scope filters: new_filters
   end
 
+  def where(clause)
+    clause.inject self do |scope, (name, value)|
+      scope.filter name, value
+    end
+  end
+
   def sort(attr)
     chain_scope sort: attr
   end
