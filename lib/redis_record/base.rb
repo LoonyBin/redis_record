@@ -36,4 +36,5 @@ module RedisRecord::Base
   def key
     self.class.key(id)
   end
+
 end

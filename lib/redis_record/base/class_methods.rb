@@ -4,7 +4,7 @@ module RedisRecord::Base
   module ClassMethods
 
     def scoped(*args)
-      RedisScope.new self, *args
+      self::Scope.new self, *args
     end
 
     delegate :filter, :where, :sort, :min, :max, :limit, :offset, :to => :scoped
@@ -18,6 +18,12 @@ module RedisRecord::Base
       find_by_key key id
     end
 
+    def scope(name, &block)
+      self::Scope.send :define_method, name, &block
+      self.define_singleton_method name do
+        scoped.send name
+      end
+    end
 
     def find_or_initialize_by_id(id)
       find(id) || self.new(:id => id)
@@ -55,6 +61,5 @@ module RedisRecord::Base
         r.original_attributes = attributes
       }
     end
-
   end
 end

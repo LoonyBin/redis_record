@@ -3,6 +3,9 @@ require 'active_support'
 require 'redis'
 
 class RedisRecord
+	def self.inherited(subclass)
+		subclass.const_set 'Scope', Class.new(RedisScope)
+	end
 
 	Dir[File.expand_path("../redis_record/**/*.rb", __FILE__)].each {|f| require f}
 
@@ -27,4 +30,5 @@ class RedisRecord
   self.defined_filters = {}
 
   ActiveSupport.run_load_hooks :redis_record, self
+
 end
