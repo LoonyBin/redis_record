@@ -36,7 +36,7 @@ describe Post do
     end
   end
 
-  context 'with has_many' do
+  context 'has_many comments' do
     let(:comments) { (1..2).map { |i| Comment.create id: i } }
     it 'should have a getter for the relation' do
       comments.each {|c| c.update_attributes post_id: post.id }
@@ -52,6 +52,24 @@ describe Post do
     it 'should have a constructor to add elements' do
       post.comments.create id: '234'
       expect(Comment.find('234').post_id).to eq post.id
+    end
+
+    context 'with default filter' do
+      class FilteredComment < RedisRecord
+        integer :id
+        create_filter :id
+        belongs_to :post
+      end
+
+      class Post
+        has_many :filtered_comments, -> { filter :id, 0 }
+      end
+
+      it 'should apply default filters' do
+        2.times {|i| FilteredComment.create id: i, post_id: post.id}
+
+        expect(post.filtered_comments.to_a).to match_array [FilteredComment.find(0)]
+      end
     end
   end
 end

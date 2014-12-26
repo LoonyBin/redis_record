@@ -21,7 +21,7 @@ module RedisRecord::Relations
       end
     end
 
-    def has_many(relation)
+    def has_many(relation, proc=nil)
       relation = relation.to_s
       column_name = "#{self.name.underscore}_id"
 
@@ -30,7 +30,10 @@ module RedisRecord::Relations
       define_method relation do
         klass = relation.singularize.classify.constantize
 
-        klass.filter column_name, id
+        scope = klass.filter column_name, id
+
+        scope = scope.instance_exec &proc if proc
+        scope
       end
 
       define_method "#{relation}=" do |enum|
