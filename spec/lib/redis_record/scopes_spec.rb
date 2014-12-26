@@ -6,6 +6,10 @@ class ModelWithScope < RedisRecord
   scope :zero_id do
     filter :id, 0
   end
+
+  scope :proc_based, -> {
+    filter :id, 1
+  }
 end
 
 describe 'Scopes' do
@@ -19,5 +23,9 @@ describe 'Scopes' do
 
   it "should make scope methods available directly on class" do
     expect(ModelWithScope.zero_id.to_a).to match_array [ModelWithScope.find(0)]
+  end
+
+  it "should work with procs" do
+    expect(ModelWithScope.proc_based.to_a).to match_array [ModelWithScope.find(1)]
   end
 end

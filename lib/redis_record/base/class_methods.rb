@@ -18,8 +18,9 @@ module RedisRecord::Base
       find_by_key key id
     end
 
-    def scope(name, &block)
-      self::Scope.send :define_method, name, &block
+    def scope(name, prc=nil, &block)
+      prc ||= block
+      self::Scope.send :define_method, name, &prc
       self.define_singleton_method name do
         scoped.send name
       end
