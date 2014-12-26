@@ -17,11 +17,16 @@ module RedisRecord::Relations
       end
 
       define_method "#{relation}=" do |obj|
-        send "#{column_name}=", obj.id
+        write_attribute column_name, obj.id
       end
     end
 
-    def has_many(relation, proc=nil)
+    def has_many(relation, proc=nil, opts={})
+      if proc.is_a? Hash
+        opts = proc
+        proc = nil
+      end
+
       relation = relation.to_s
       column_name = "#{self.name.underscore}_id"
 
@@ -38,6 +43,12 @@ module RedisRecord::Relations
 
       define_method "#{relation}=" do |enum|
         enum.each { |obj| obj.update_attributes column_name => id }
+      end
+
+      if opts[:dependent] == :destroy
+        set_callback :destroy do |record|
+          record.send(relation).each &:destroy
+        end
       end
     end
   end

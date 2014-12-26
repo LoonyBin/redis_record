@@ -12,23 +12,19 @@ module RedisRecord::Base
 
   def save
     success = nil
-    RedisRecord.REDIS.multi do
-      run_callbacks :save do
-        success = RedisRecord.REDIS.mapped_hmset(key, attributes)
-      end
+    run_callbacks :save do
+      success = RedisRecord.REDIS.mapped_hmset(key, attributes)
     end
-    self.persisted = (success.value == "OK")
+    self.persisted = (success == "OK")
   end
   alias save! save
 
   def destroy
     success = nil
-    RedisRecord.REDIS.multi do
-      run_callbacks :destroy do
-        success = RedisRecord.REDIS.del key
-      end
+    run_callbacks :destroy do
+      success = RedisRecord.REDIS.del key
     end
-    success.value == 1 ? self : nil
+    success == 1 ? self : nil
   end
   alias destroy! destroy
 

@@ -71,5 +71,18 @@ describe Post do
         expect(post.filtered_comments.to_a).to match_array [FilteredComment.find(0)]
       end
     end
+
+    context 'with options' do
+      class Post
+        has_many :comments, dependent: :destroy
+      end
+
+      it 'should destroy dependent records' do
+        post.comments.create id: '345'
+
+        post.destroy
+        expect(Comment.find('345')).to eq nil
+      end
+    end
   end
 end
